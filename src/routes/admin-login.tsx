@@ -1,0 +1,102 @@
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { ensureAdminRole } from "@/lib/admin.functions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { ShieldCheck } from "lucide-react";
+import { adminConfig } from "@/config/adminConfig";
+
+export const Route = createFileRoute("/admin-login")({ component: AdminLogin });
+
+function AdminLogin() {
+  const nav = useNavigate();
+  const ensureAdmin = useServerFn(ensureAdminRole);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      if (email.trim().toLowerCase() !== adminConfig.ADMIN_EMAIL.toLowerCase()) {
+        toast.error("This portal is for administrators only.");
+        return;
+      }
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      // Elevate to admin role on the server
+      const res = await ensureAdmin();
+      if (!res?.admin) {
+        await supabase.auth.signOut();
+        toast.error("Not an admin account.");
+        return;
+      }
+      toast.success("Welcome, admin");
+      nav({ to: "/admin" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="grid min-h-screen place-items-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
+      <div className="w-full max-w-md rounded-2xl border border-slate-700 bg-slate-900/80 p-8 shadow-2xl backdrop-blur">
+        <div className="mb-6 flex items-center gap-2">
+          <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary text-primary-foreground">
+            <ShieldCheck className="h-5 w-5" />
+          </div>
+          <div>
+            <div className="font-semibold text-white">Admin Portal</div>
+            <div className="text-xs text-slate-400">Prima Interns</div>
+          </div>
+        </div>
+        <h1 className="text-2xl font-bold text-white">Administrator sign in</h1>
+        <p className="mt-1 text-sm text-slate-400">
+          Restricted access. Manage interns, assign tasks, and review submissions.
+        </p>
+
+        <form onSubmit={onSubmit} className="mt-6 space-y-4">
+          <div>
+            <Label htmlFor="email" className="text-slate-200">Admin Email</Label>
+            <Input
+              id="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder={adminConfig.ADMIN_EMAIL}
+              className="bg-slate-800 text-white border-slate-700"
+            />
+          </div>
+          <div>
+            <Label htmlFor="password" className="text-slate-200">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="bg-slate-800 text-white border-slate-700"
+            />
+          </div>
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "Signing in..." : "Sign in to Admin Portal"}
+          </Button>
+        </form>
+
+        <div className="mt-6 flex items-center justify-between text-xs text-slate-400">
+          <Link to="/" className="hover:text-white">← Back to home</Link>
+          <Link to="/login" className="hover:text-white">Intern login →</Link>
+        </div>
+      </div>
+    </div>
+  );
+}
