@@ -43,9 +43,10 @@ function Landing() {
             Multi-step onboarding, sequential task progression, admin approvals, and
             automated certificates — all in one clean dashboard.
           </p>
-          <div className="mt-8 flex justify-center gap-3">
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Button asChild size="lg"><Link to="/register">Register as Intern</Link></Button>
-            <Button asChild size="lg" variant="outline"><Link to="/login">Admin Login</Link></Button>
+            <Button asChild size="lg" variant="outline"><Link to="/login">Intern Login</Link></Button>
+            <Button asChild size="lg" variant="secondary"><Link to="/admin-login">Admin Login</Link></Button>
           </div>
         </section>
 
