@@ -23,20 +23,30 @@ function AdminLogin() {
     e.preventDefault();
     setLoading(true);
     try {
-      if (email.trim().toLowerCase() !== adminConfig.ADMIN_EMAIL.toLowerCase()) {
-        toast.error("This portal is for administrators only.");
-        return;
-      }
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         toast.error(error.message);
         return;
       }
-      // Elevate to admin role on the server
-      const res = await ensureAdmin();
-      if (!res?.admin) {
+      // Elevate to admin if this is the primary admin email (no-op otherwise)
+      try { await ensureAdmin(); } catch { /* not the primary admin */ }
+
+      // Check whether the signed-in user actually has the admin role
+      const { data: userData } = await supabase.auth.getUser();
+      const uid = userData.user?.id;
+      if (!uid) {
         await supabase.auth.signOut();
-        toast.error("Not an admin account.");
+        toast.error("Sign-in failed.");
+        return;
+      }
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", uid);
+      const isAdmin = !!roles?.some((r) => r.role === "admin");
+      if (!isAdmin) {
+        await supabase.auth.signOut();
+        toast.error("This account does not have admin access.");
         return;
       }
       toast.success("Welcome, admin");
