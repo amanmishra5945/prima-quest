@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
-import { ensureAdminRole } from "@/lib/admin.functions";
+import { ensureAdminRole, claimAdminWithCode } from "@/lib/admin.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +15,7 @@ export const Route = createFileRoute("/admin-login")({ component: AdminLogin });
 function AdminLogin() {
   const nav = useNavigate();
   const ensureAdmin = useServerFn(ensureAdminRole);
+  const claim = useServerFn(claimAdminWithCode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,11 +26,26 @@ function AdminLogin() {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
-        toast.error(error.message);
+        const msg = /confirm/i.test(error.message)
+          ? "Please verify your email first. Check your inbox for the confirmation link."
+          : error.message;
+        toast.error(msg);
         return;
       }
       // Elevate to admin if this is the primary admin email (no-op otherwise)
       try { await ensureAdmin(); } catch { /* not the primary admin */ }
+
+      // If a signup code is pending from admin-signup, claim admin now
+      let pendingCode: string | null = null;
+      try { pendingCode = localStorage.getItem("pendingAdminCode"); } catch { /* ignore */ }
+      if (pendingCode) {
+        try {
+          await claim({ data: { code: pendingCode } });
+          localStorage.removeItem("pendingAdminCode");
+        } catch (e) {
+          toast.error(e instanceof Error ? e.message : "Invalid admin signup code");
+        }
+      }
 
       // Check whether the signed-in user actually has the admin role
       const { data: userData } = await supabase.auth.getUser();
