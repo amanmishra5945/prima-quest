@@ -37,12 +37,12 @@ function AdminSignup() {
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
     setLoading(true);
     try {
-      // 1) Create the auth account
+      // 1) Create the auth account (email verification required)
       const { error: signUpErr } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: `${window.location.origin}/admin-login`,
           data: { name: form.name, mobile: form.designation },
         },
       });
@@ -50,20 +50,12 @@ function AdminSignup() {
         toast.error(signUpErr.message);
         return;
       }
-      // 2) Sign in immediately so the next call has a session
-      const { error: signInErr } = await supabase.auth.signInWithPassword({
-        email: form.email,
-        password: form.password,
-      });
-      if (signInErr) {
-        toast.error("Account created. Please sign in via Admin Login.");
-        nav({ to: "/admin-login" });
-        return;
-      }
-      // 3) Claim admin via signup code
-      await claim({ data: { code: form.code } });
-      toast.success("Admin account ready");
-      nav({ to: "/admin" });
+      // Persist the admin code so it can be claimed after email verification + sign-in
+      try {
+        localStorage.setItem("pendingAdminCode", form.code);
+      } catch { /* ignore */ }
+      toast.success("Check your email to verify your admin account, then sign in.");
+      nav({ to: "/admin-login" });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Signup failed");
     } finally {

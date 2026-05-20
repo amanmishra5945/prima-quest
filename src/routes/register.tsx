@@ -40,8 +40,8 @@ function Register() {
     });
     setLoading(false);
     if (error) return toast.error(error.message);
-    toast.success("Account created — continue onboarding");
-    nav({ to: "/" });
+    toast.success("Check your email to verify your account before signing in.");
+    nav({ to: "/login" });
   };
 
   return (
