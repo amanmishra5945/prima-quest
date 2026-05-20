@@ -47,6 +47,7 @@ function Landing() {
             <Button asChild size="lg"><Link to="/register">Register as Intern</Link></Button>
             <Button asChild size="lg" variant="outline"><Link to="/login">Intern Login</Link></Button>
             <Button asChild size="lg" variant="secondary"><Link to="/admin-login">Admin Login</Link></Button>
+            <Button asChild size="lg" variant="ghost"><Link to="/admin-signup">Admin Signup</Link></Button>
           </div>
         </section>
 
