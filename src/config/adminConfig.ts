@@ -10,5 +10,5 @@ export const adminConfig = {
   ADMIN_EMAIL: "admin@primainterns.com",
   ADMIN_NAME: "Prima Admin",
   ADMIN_DEFAULT_PASSWORD: "Admin@12345",
-  ADMIN_SIGNUP_CODE: "PRIMA-ADMIN-2026",
+  ADMIN_SIGNUP_CODE: "PRIMA-ADMIN-2026-X7K9",
 };
