@@ -40,8 +40,8 @@ function Register() {
     });
     setLoading(false);
     if (error) return toast.error(error.message);
-    toast.success("Check your email to verify your account before signing in.");
-    nav({ to: "/login" });
+    toast.success("We've emailed you a 6-digit verification code.");
+    nav({ to: "/verify-email", search: { email: form.email, next: "/login" } });
   };
 
   return (
