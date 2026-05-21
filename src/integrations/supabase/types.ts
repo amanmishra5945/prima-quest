@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_settings: {
+        Row: {
+          id: number
+          signup_code: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          id?: number
+          signup_code: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          id?: number
+          signup_code?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       college_details: {
         Row: {
           branch: string | null
@@ -312,6 +333,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      verify_admin_signup_code: { Args: { _code: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "intern"
