@@ -131,18 +131,24 @@ function Dashboard() {
           </div>
           <Progress value={progressPct} className="mt-4" />
 
-          {allApproved && (
-            <div className="mt-6 flex flex-col items-start gap-3 rounded-lg border border-success/30 bg-success/10 p-4 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-center gap-3">
-                <Award className="h-6 w-6 text-success" />
-                <div>
-                  <div className="font-semibold">Congratulations! All tasks approved.</div>
-                  <div className="text-sm text-muted-foreground">Your certificate is ready to download.</div>
+          <div className={`mt-6 flex flex-col items-start gap-3 rounded-lg border p-4 md:flex-row md:items-center md:justify-between ${allApproved ? "border-success/30 bg-success/10" : "border-border bg-muted/30"}`}>
+            <div className="flex items-center gap-3">
+              <Award className={`h-6 w-6 ${allApproved ? "text-success" : "text-muted-foreground"}`} />
+              <div>
+                <div className="font-semibold">
+                  {allApproved ? "Congratulations! All tasks approved." : "Completion Certificate"}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {allApproved
+                    ? "Your certificate is ready to download."
+                    : `Complete all ${tasks.length || ""} tasks to unlock your certificate (${approvedCount}/${tasks.length || 0} approved).`}
                 </div>
               </div>
-              <Button onClick={downloadCert}>Download Certificate</Button>
             </div>
-          )}
+            <Button onClick={downloadCert} disabled={!allApproved}>
+              Download Certificate
+            </Button>
+          </div>
         </div>
 
         <div className="mt-6 space-y-4">
