@@ -118,8 +118,9 @@ function AdminLogin() {
           </Button>
         </form>
 
-        <div className="mt-6 flex items-center justify-start text-xs text-slate-400">
+        <div className="mt-6 flex items-center justify-between text-xs text-slate-400">
           <Link to="/" className="hover:text-white">← Back to home</Link>
+          <Link to="/admin-signup" className="hover:text-white">Create admin account →</Link>
         </div>
         <div className="mt-2 text-center text-xs text-slate-500">
           <Link to="/login" className="hover:text-white">Intern login</Link>
