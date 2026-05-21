@@ -192,6 +192,10 @@ function AdminPanel() {
           <StatCard label="Total Tasks" value={tasks.length} icon={CheckCircle2} />
         </div>
 
+        <AdminSignupCodeCard />
+
+
+
         <div className="rounded-xl border bg-card">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b p-4">
             <h2 className="text-lg font-semibold">Interns</h2>
