@@ -11,9 +11,11 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { LogOut, GraduationCap, Plus, Download, Users, CheckCircle2, Clock, AlertCircle, Lock } from "lucide-react";
+import { LogOut, GraduationCap, Plus, Download, Users, CheckCircle2, Clock, AlertCircle, Lock, KeyRound, Eye, EyeOff } from "lucide-react";
 import { exportToExcel } from "@/lib/export";
 import { adminConfig } from "@/config/adminConfig";
+import { useServerFn } from "@tanstack/react-start";
+import { getAdminSignupCode, updateAdminSignupCode } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/admin")({ component: AdminPanel });
 
@@ -190,6 +192,10 @@ function AdminPanel() {
           <StatCard label="Total Tasks" value={tasks.length} icon={CheckCircle2} />
         </div>
 
+        <AdminSignupCodeCard />
+
+
+
         <div className="rounded-xl border bg-card">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b p-4">
             <h2 className="text-lg font-semibold">Interns</h2>
@@ -341,3 +347,83 @@ function StatCard({ label, value, icon: Icon }: { label: string; value: number; 
     </div>
   );
 }
+
+function AdminSignupCodeCard() {
+  const getCode = useServerFn(getAdminSignupCode);
+  const updateCode = useServerFn(updateAdminSignupCode);
+  const [current, setCurrent] = useState<string>("");
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
+  const [value, setValue] = useState("");
+  const [show, setShow] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const refresh = useCallback(async () => {
+    try {
+      const r = await getCode();
+      setCurrent(r.code);
+      setValue(r.code);
+      setUpdatedAt(r.updated_at);
+    } catch (e) {
+      // silently ignore for non-admins
+    }
+  }, [getCode]);
+
+  useEffect(() => { refresh(); }, [refresh]);
+
+  const save = async () => {
+    const trimmed = value.trim();
+    if (trimmed.length < 6) return toast.error("Code must be at least 6 characters");
+    if (trimmed === current) return toast.info("Code unchanged");
+    setSaving(true);
+    try {
+      await updateCode({ data: { code: trimmed } });
+      toast.success("Admin signup code updated");
+      await refresh();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to update code");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="mb-6 rounded-xl border bg-card p-5">
+      <div className="mb-3 flex items-center gap-2">
+        <KeyRound className="h-4 w-4 text-muted-foreground" />
+        <h2 className="text-base font-semibold">Admin signup code</h2>
+      </div>
+      <p className="mb-3 text-sm text-muted-foreground">
+        Anyone registering at <span className="font-mono">/admin-signup</span> must enter this code.
+        Change it any time to invalidate old codes.
+      </p>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="relative flex-1">
+          <Input
+            type={show ? "text" : "password"}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            placeholder="Set a new secret code"
+            className="pr-10 font-mono"
+          />
+          <button
+            type="button"
+            onClick={() => setShow((s) => !s)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            aria-label={show ? "Hide" : "Show"}
+          >
+            {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
+        </div>
+        <Button onClick={save} disabled={saving}>
+          {saving ? "Saving..." : "Update code"}
+        </Button>
+      </div>
+      {updatedAt && (
+        <div className="mt-2 text-xs text-muted-foreground">
+          Last updated {new Date(updatedAt).toLocaleString()}
+        </div>
+      )}
+    </div>
+  );
+}
+
