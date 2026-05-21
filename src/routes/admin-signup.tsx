@@ -54,8 +54,8 @@ function AdminSignup() {
       try {
         localStorage.setItem("pendingAdminCode", form.code);
       } catch { /* ignore */ }
-      toast.success("Check your email to verify your admin account, then sign in.");
-      nav({ to: "/admin-login" });
+      toast.success("We've emailed you a 6-digit verification code.");
+      nav({ to: "/verify-email", search: { email: form.email, next: "/admin-login" } });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Signup failed");
     } finally {
