@@ -35,18 +35,18 @@ function AdminLogin() {
       // Elevate to admin if this is the primary admin email (no-op otherwise)
       try { await ensureAdmin(); } catch { /* not the primary admin */ }
 
-      // If a pending admin claim is queued from admin-signup, elevate now
-      let pendingClaim: string | null = null;
-      try { pendingClaim = localStorage.getItem("pendingAdminClaim"); } catch { /* ignore */ }
-      if (pendingClaim) {
+      // If a signup code is pending from admin-signup, claim admin now
+      let pendingCode: string | null = null;
+      try { pendingCode = localStorage.getItem("pendingAdminCode"); } catch { /* ignore */ }
+      if (pendingCode) {
         try {
-          await claim();
-          localStorage.removeItem("pendingAdminClaim");
+          await claim({ data: { code: pendingCode } });
           localStorage.removeItem("pendingAdminCode");
         } catch (e) {
-          toast.error(e instanceof Error ? e.message : "Could not grant admin role");
+          toast.error(e instanceof Error ? e.message : "Invalid admin signup code");
         }
       }
+
 
 
       // Check whether the signed-in user actually has the admin role
