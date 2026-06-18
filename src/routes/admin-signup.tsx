@@ -54,7 +54,11 @@ function AdminSignup() {
         password: form.password,
         options: {
           emailRedirectTo: `${window.location.origin}/admin-login`,
-          data: { name: form.name, mobile: form.designation },
+          data: {
+            name: form.name,
+            mobile: form.designation,
+            admin_code: form.code,
+          },
         },
       });
       if (signUpErr) {
