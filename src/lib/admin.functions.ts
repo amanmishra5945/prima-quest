@@ -38,7 +38,22 @@ export const ensureAdminRole = createServerFn({ method: "POST" })
  */
 export const claimAdminWithCode = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((input) =>
+    z.object({ code: z.string().min(1).max(200) }).parse(input),
+  )
+  .handler(async ({ context, data }) => {
+    const { data: settings, error: readErr } = await supabaseAdmin
+      .from("admin_settings")
+      .select("signup_code")
+      .eq("id", 1)
+      .maybeSingle();
+    if (readErr) throw new Error(readErr.message);
+
+    const currentCode = settings?.signup_code ?? adminConfig.ADMIN_SIGNUP_CODE;
+    if (data.code !== currentCode) {
+      throw new Error("Invalid admin signup code");
+    }
+
     const { error } = await supabaseAdmin
       .from("user_roles")
       .upsert(
@@ -54,6 +69,7 @@ export const claimAdminWithCode = createServerFn({ method: "POST" })
 
     return { admin: true };
   });
+
 
 
 /** Returns the current admin signup code. Caller must be an admin. */

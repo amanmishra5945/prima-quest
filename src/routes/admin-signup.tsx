@@ -15,12 +15,13 @@ const schema = z.object({
   email: z.string().trim().email().max(255),
   designation: z.string().trim().min(2).max(100),
   password: z.string().min(6).max(72),
+  code: z.string().min(1).max(200),
 });
 
 function AdminSignup() {
   const nav = useNavigate();
   const [form, setForm] = useState({
-    name: "", email: "", designation: "", password: "",
+    name: "", email: "", designation: "", password: "", code: "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -45,8 +46,7 @@ function AdminSignup() {
         toast.error(signUpErr.message);
         return;
       }
-      // Mark this account to be elevated to admin after email verification + sign-in
-      try { localStorage.setItem("pendingAdminClaim", "1"); } catch { /* ignore */ }
+      try { localStorage.setItem("pendingAdminCode", form.code); } catch { /* ignore */ }
       toast.success("We've emailed you a 6-digit verification code.");
       nav({ to: "/verify-email", search: { email: form.email, next: "/admin-login" } });
     } catch (err) {
@@ -70,7 +70,7 @@ function AdminSignup() {
         </div>
         <h1 className="text-2xl font-bold text-white">Create administrator account</h1>
         <p className="mt-1 text-sm text-slate-400">
-          Open admin registration — no access code required.
+          Requires a valid admin signup code from the system owner.
         </p>
 
         <form onSubmit={onSubmit} className="mt-6 space-y-4">
@@ -93,6 +93,11 @@ function AdminSignup() {
           <div>
             <Label htmlFor="password" className="text-slate-200">Password</Label>
             <Input id="password" type="password" required value={form.password} onChange={set("password")}
+              className="bg-slate-800 text-white border-slate-700" />
+          </div>
+          <div>
+            <Label htmlFor="code" className="text-slate-200">Admin Signup Code</Label>
+            <Input id="code" required value={form.code} onChange={set("code")}
               className="bg-slate-800 text-white border-slate-700" />
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
