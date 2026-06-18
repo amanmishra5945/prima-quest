@@ -34,6 +34,21 @@ function AdminSignup() {
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
     setLoading(true);
     try {
+      // Validate signup code BEFORE creating the account so wrong codes
+      // are rejected upfront, not silently after email verification.
+      const { data: codeOk, error: codeErr } = await supabase.rpc(
+        "verify_admin_signup_code",
+        { _code: form.code },
+      );
+      if (codeErr) {
+        toast.error(codeErr.message);
+        return;
+      }
+      if (!codeOk) {
+        toast.error("Invalid admin signup code. Contact the system owner.");
+        return;
+      }
+
       const { error: signUpErr } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
@@ -49,6 +64,7 @@ function AdminSignup() {
       try { localStorage.setItem("pendingAdminCode", form.code); } catch { /* ignore */ }
       toast.success("We've emailed you a 6-digit verification code.");
       nav({ to: "/verify-email", search: { email: form.email, next: "/admin-login" } });
+
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Signup failed");
     } finally {
