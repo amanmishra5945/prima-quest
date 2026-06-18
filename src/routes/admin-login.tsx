@@ -35,17 +35,19 @@ function AdminLogin() {
       // Elevate to admin if this is the primary admin email (no-op otherwise)
       try { await ensureAdmin(); } catch { /* not the primary admin */ }
 
-      // If a signup code is pending from admin-signup, claim admin now
-      let pendingCode: string | null = null;
-      try { pendingCode = localStorage.getItem("pendingAdminCode"); } catch { /* ignore */ }
-      if (pendingCode) {
+      // If a pending admin claim is queued from admin-signup, elevate now
+      let pendingClaim: string | null = null;
+      try { pendingClaim = localStorage.getItem("pendingAdminClaim"); } catch { /* ignore */ }
+      if (pendingClaim) {
         try {
-          await claim({ data: { code: pendingCode } });
+          await claim();
+          localStorage.removeItem("pendingAdminClaim");
           localStorage.removeItem("pendingAdminCode");
         } catch (e) {
-          toast.error(e instanceof Error ? e.message : "Invalid admin signup code");
+          toast.error(e instanceof Error ? e.message : "Could not grant admin role");
         }
       }
+
 
       // Check whether the signed-in user actually has the admin role
       const { data: userData } = await supabase.auth.getUser();
