@@ -23,13 +23,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(1);
   const ensureAdmin = useServerFn(ensureAdminRole);
+  const claimAdmin = useServerFn(claimAdminWithCode);
 
   const loadMeta = async (uid: string) => {
-    // Try elevate to admin
+    // Try elevate to admin (primary admin email)
     try {
       await ensureAdmin();
     } catch {
       /* not admin */
+    }
+    // If a pending admin signup code is queued, try to claim admin now
+    let pendingCode: string | null = null;
+    try { pendingCode = localStorage.getItem("pendingAdminCode"); } catch { /* ignore */ }
+    if (pendingCode) {
+      try {
+        await claimAdmin({ data: { code: pendingCode } });
+        localStorage.removeItem("pendingAdminCode");
+      } catch {
+        /* invalid or already claimed */
+      }
     }
     const [{ data: roles }, { data: profile }] = await Promise.all([
       supabase.from("user_roles").select("role").eq("user_id", uid),
