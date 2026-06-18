@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
-import { ensureAdminRole } from "@/lib/admin.functions";
+import { ensureAdminRole, claimAdminWithCode } from "@/lib/admin.functions";
 
 interface AuthCtx {
   user: User | null;
