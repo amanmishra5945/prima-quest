@@ -37,7 +37,7 @@ function Register() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  const [account, setAccount] = useState({ name: "", mobile: "", password: "" });
+  const [account, setAccount] = useState({ mobile: "", password: "" });
   const [personal, setPersonal] = useState({ date_of_birth: "", address: "", skills: "", internship_domain: "" });
   const [college, setCollege] = useState({ college_name: "", degree: "", branch: "", year_of_passing: "", email: "" });
 
