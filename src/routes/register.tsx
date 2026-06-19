@@ -13,6 +13,8 @@ import { Check, GraduationCap } from "lucide-react";
 export const Route = createFileRoute("/register")({ component: Register });
 
 const accountSchema = z.object({
+  name: z.string().trim().min(2).max(100),
+  email: z.string().trim().email().max(255),
   mobile: z.string().trim().min(7).max(20),
   password: z.string().min(6).max(72),
 });
@@ -29,7 +31,6 @@ const collegeSchema = z.object({
   degree: z.string().trim().min(1),
   branch: z.string().trim().min(1),
   year_of_passing: z.string().regex(/^\d{4}$/),
-  email: z.string().trim().email().max(255),
 });
 
 function Register() {
@@ -37,9 +38,9 @@ function Register() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  const [account, setAccount] = useState({ mobile: "", password: "" });
+  const [account, setAccount] = useState({ name: "", email: "", mobile: "", password: "" });
   const [personal, setPersonal] = useState({ date_of_birth: "", address: "", skills: "", internship_domain: "" });
-  const [college, setCollege] = useState({ college_name: "", degree: "", branch: "", year_of_passing: "", email: "" });
+  const [college, setCollege] = useState({ college_name: "", degree: "", branch: "", year_of_passing: "" });
 
   const submitAccount = (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,11 +62,11 @@ function Register() {
     if (!r.success) return toast.error(r.error.issues[0].message);
     setLoading(true);
     const { error } = await supabase.auth.signUp({
-      email: college.email,
+      email: account.email,
       password: account.password,
       options: {
         emailRedirectTo: `${window.location.origin}/`,
-        data: { name: college.email, mobile: account.mobile },
+        data: { name: account.name, mobile: account.mobile },
       },
     });
     if (error) { setLoading(false); return toast.error(error.message); }
@@ -73,7 +74,7 @@ function Register() {
     // Save pending onboarding data; flushed to DB after email verification (use-auth)
     try {
       localStorage.setItem("pendingOnboarding", JSON.stringify({
-        email: college.email,
+        email: account.email,
         personal,
         college: { ...college, year_of_passing: parseInt(college.year_of_passing, 10) },
       }));
@@ -81,7 +82,7 @@ function Register() {
 
     setLoading(false);
     toast.success("Verification email sent. Please verify to finish registration.");
-    nav({ to: "/verify-email", search: { email: college.email, next: "/dashboard" } });
+    nav({ to: "/verify-email", search: { email: account.email, next: "/dashboard" } });
   };
 
   const progress = (step / 3) * 100;
@@ -125,6 +126,14 @@ function Register() {
 
         {step === 1 && (
           <form onSubmit={submitAccount} className="space-y-4">
+            <div>
+              <Label htmlFor="name">Full name</Label>
+              <Input id="name" required value={account.name} onChange={(e) => setAccount({ ...account, name: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" required value={account.email} onChange={(e) => setAccount({ ...account, email: e.target.value })} />
+            </div>
             <div>
               <Label htmlFor="mobile">Mobile number</Label>
               <Input id="mobile" required value={account.mobile} onChange={(e) => setAccount({ ...account, mobile: e.target.value })} />
@@ -180,11 +189,7 @@ function Register() {
               <Label htmlFor="year">Year of Passing</Label>
               <Input id="year" type="number" required min="2000" max="2099" value={college.year_of_passing} onChange={(e) => setCollege({ ...college, year_of_passing: e.target.value })} />
             </div>
-            <div>
-              <Label htmlFor="email">Email (for verification)</Label>
-              <Input id="email" type="email" required value={college.email} onChange={(e) => setCollege({ ...college, email: e.target.value })} />
-              <p className="mt-1 text-xs text-muted-foreground">We'll send a verification link to this email.</p>
-            </div>
+            <p className="text-xs text-muted-foreground">A verification link will be sent to <strong>{account.email}</strong> when you submit.</p>
             <div className="flex gap-2">
               <Button type="button" variant="outline" className="flex-1" onClick={() => setStep(2)} disabled={loading}>Back</Button>
               <Button type="submit" className="flex-1" disabled={loading}>
