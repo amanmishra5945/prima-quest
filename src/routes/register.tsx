@@ -62,11 +62,11 @@ function Register() {
     if (!r.success) return toast.error(r.error.issues[0].message);
     setLoading(true);
     const { error } = await supabase.auth.signUp({
-      email: college.email,
+      email: account.email,
       password: account.password,
       options: {
         emailRedirectTo: `${window.location.origin}/`,
-        data: { name: college.email, mobile: account.mobile },
+        data: { name: account.name, mobile: account.mobile },
       },
     });
     if (error) { setLoading(false); return toast.error(error.message); }
@@ -74,7 +74,7 @@ function Register() {
     // Save pending onboarding data; flushed to DB after email verification (use-auth)
     try {
       localStorage.setItem("pendingOnboarding", JSON.stringify({
-        email: college.email,
+        email: account.email,
         personal,
         college: { ...college, year_of_passing: parseInt(college.year_of_passing, 10) },
       }));
@@ -82,7 +82,7 @@ function Register() {
 
     setLoading(false);
     toast.success("Verification email sent. Please verify to finish registration.");
-    nav({ to: "/verify-email", search: { email: college.email, next: "/dashboard" } });
+    nav({ to: "/verify-email", search: { email: account.email, next: "/dashboard" } });
   };
 
   const progress = (step / 3) * 100;
