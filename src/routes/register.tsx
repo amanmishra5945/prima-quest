@@ -13,7 +13,6 @@ import { Check, GraduationCap } from "lucide-react";
 export const Route = createFileRoute("/register")({ component: Register });
 
 const accountSchema = z.object({
-  name: z.string().trim().min(2).max(100),
   mobile: z.string().trim().min(7).max(20),
   password: z.string().min(6).max(72),
 });
