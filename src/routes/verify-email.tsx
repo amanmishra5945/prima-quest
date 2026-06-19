@@ -1,5 +1,6 @@
-import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link, useSearch, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
