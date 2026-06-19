@@ -181,11 +181,7 @@ function Register() {
               <Label htmlFor="year">Year of Passing</Label>
               <Input id="year" type="number" required min="2000" max="2099" value={college.year_of_passing} onChange={(e) => setCollege({ ...college, year_of_passing: e.target.value })} />
             </div>
-            <div>
-              <Label htmlFor="email">Email (for verification)</Label>
-              <Input id="email" type="email" required value={college.email} onChange={(e) => setCollege({ ...college, email: e.target.value })} />
-              <p className="mt-1 text-xs text-muted-foreground">We'll send a verification link to this email.</p>
-            </div>
+            <p className="text-xs text-muted-foreground">A verification link will be sent to <strong>{account.email}</strong> when you submit.</p>
             <div className="flex gap-2">
               <Button type="button" variant="outline" className="flex-1" onClick={() => setStep(2)} disabled={loading}>Back</Button>
               <Button type="submit" className="flex-1" disabled={loading}>
