@@ -13,6 +13,8 @@ import { Check, GraduationCap } from "lucide-react";
 export const Route = createFileRoute("/register")({ component: Register });
 
 const accountSchema = z.object({
+  name: z.string().trim().min(2).max(100),
+  email: z.string().trim().email().max(255),
   mobile: z.string().trim().min(7).max(20),
   password: z.string().min(6).max(72),
 });
@@ -29,7 +31,6 @@ const collegeSchema = z.object({
   degree: z.string().trim().min(1),
   branch: z.string().trim().min(1),
   year_of_passing: z.string().regex(/^\d{4}$/),
-  email: z.string().trim().email().max(255),
 });
 
 function Register() {
@@ -37,9 +38,9 @@ function Register() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  const [account, setAccount] = useState({ mobile: "", password: "" });
+  const [account, setAccount] = useState({ name: "", email: "", mobile: "", password: "" });
   const [personal, setPersonal] = useState({ date_of_birth: "", address: "", skills: "", internship_domain: "" });
-  const [college, setCollege] = useState({ college_name: "", degree: "", branch: "", year_of_passing: "", email: "" });
+  const [college, setCollege] = useState({ college_name: "", degree: "", branch: "", year_of_passing: "" });
 
   const submitAccount = (e: React.FormEvent) => {
     e.preventDefault();
