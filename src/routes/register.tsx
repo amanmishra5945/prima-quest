@@ -13,7 +13,6 @@ import { Check, GraduationCap } from "lucide-react";
 export const Route = createFileRoute("/register")({ component: Register });
 
 const accountSchema = z.object({
-  name: z.string().trim().min(2).max(100),
   mobile: z.string().trim().min(7).max(20),
   password: z.string().min(6).max(72),
 });
@@ -38,7 +37,7 @@ function Register() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  const [account, setAccount] = useState({ name: "", mobile: "", password: "" });
+  const [account, setAccount] = useState({ mobile: "", password: "" });
   const [personal, setPersonal] = useState({ date_of_birth: "", address: "", skills: "", internship_domain: "" });
   const [college, setCollege] = useState({ college_name: "", degree: "", branch: "", year_of_passing: "", email: "" });
 
@@ -66,7 +65,7 @@ function Register() {
       password: account.password,
       options: {
         emailRedirectTo: `${window.location.origin}/`,
-        data: { name: account.name, mobile: account.mobile },
+        data: { name: college.email, mobile: account.mobile },
       },
     });
     if (error) { setLoading(false); return toast.error(error.message); }
@@ -126,10 +125,6 @@ function Register() {
 
         {step === 1 && (
           <form onSubmit={submitAccount} className="space-y-4">
-            <div>
-              <Label htmlFor="name">Full name</Label>
-              <Input id="name" required value={account.name} onChange={(e) => setAccount({ ...account, name: e.target.value })} />
-            </div>
             <div>
               <Label htmlFor="mobile">Mobile number</Label>
               <Input id="mobile" required value={account.mobile} onChange={(e) => setAccount({ ...account, mobile: e.target.value })} />
