@@ -65,7 +65,7 @@ function Register() {
       password: account.password,
       options: {
         emailRedirectTo: `${window.location.origin}/`,
-        data: { name: account.name, mobile: account.mobile },
+        data: { name: college.email, mobile: account.mobile },
       },
     });
     if (error) { setLoading(false); return toast.error(error.message); }
