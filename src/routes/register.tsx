@@ -127,6 +127,14 @@ function Register() {
         {step === 1 && (
           <form onSubmit={submitAccount} className="space-y-4">
             <div>
+              <Label htmlFor="name">Full name</Label>
+              <Input id="name" required value={account.name} onChange={(e) => setAccount({ ...account, name: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" required value={account.email} onChange={(e) => setAccount({ ...account, email: e.target.value })} />
+            </div>
+            <div>
               <Label htmlFor="mobile">Mobile number</Label>
               <Input id="mobile" required value={account.mobile} onChange={(e) => setAccount({ ...account, mobile: e.target.value })} />
             </div>
